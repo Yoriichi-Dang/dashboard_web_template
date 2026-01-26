@@ -5,7 +5,7 @@ import { parseAsInteger, useQueryState } from 'nuqs';
 
 import { DataTable } from '@/shared/components/ui/table/data-table';
 import { DataTableToolbar } from '@/shared/components/ui/table/data-table-toolbar';
-import { useDataTable } from '@/hooks/use-data-table';
+import { useDataTable } from '@/shared/hooks/use-data-table';
 
 interface ProductTableParams<TData, TValue> {
   data: TData[];

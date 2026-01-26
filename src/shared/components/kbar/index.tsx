@@ -10,7 +10,8 @@ import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 
 import { navItems } from '@/shared/config/nav-config';
-import { useFilteredNavItems } from '@/hooks/use-nav';
+import { useFilteredNavItems } from '@/shared/hooks/use-nav';
+import type { NavItem } from '@/shared/types';
 
 import RenderResults from './render-result';
 import useThemeSwitching from './use-theme-switching';
@@ -26,7 +27,7 @@ export default function KBar({ children }: { children: React.ReactNode }) {
       router.push(url);
     };
 
-    return filteredItems.flatMap((navItem) => {
+    return filteredItems.flatMap((navItem: NavItem) => {
       // Only include base action if the navItem has a real URL and is not just a container
       const baseAction =
         navItem.url !== '#'
@@ -43,7 +44,7 @@ export default function KBar({ children }: { children: React.ReactNode }) {
 
       // Map child items into actions
       const childActions =
-        navItem.items?.map((childItem) => ({
+        navItem.items?.map((childItem: NavItem) => ({
           id: `${childItem.title.toLowerCase()}Action`,
           name: childItem.title,
           shortcut: childItem.shortcut,

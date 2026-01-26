@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { Button } from '@/shared/components/ui/button';
 import { Progress } from '@/shared/components/ui/progress';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { useControllableState } from '@/hooks/use-controllable-state';
+import { useControllableState } from '@/shared/hooks/use-controllable-state';
 import { cn, formatBytes } from '@/shared/lib/utils';
 
 export interface FileUploaderProps
@@ -165,7 +165,7 @@ export function FileUploader(props: FileUploaderProps) {
 
   function onRemove(index: number) {
     if (!files) return;
-    const newFiles = files.filter((_, i) => i !== index);
+    const newFiles = files.filter((_: File, i: number) => i !== index);
     setFiles(newFiles);
     onValueChange?.(newFiles);
   }
@@ -174,7 +174,7 @@ export function FileUploader(props: FileUploaderProps) {
   React.useEffect(() => {
     return () => {
       if (!files) return;
-      files.forEach((file) => {
+      files.forEach((file: File) => {
         if (isFileWithPreview(file)) {
           URL.revokeObjectURL(file.preview);
         }
@@ -248,7 +248,7 @@ export function FileUploader(props: FileUploaderProps) {
       {files?.length ? (
         <ScrollArea className='h-fit w-full px-3'>
           <div className='max-h-48 space-y-4'>
-            {files?.map((file, index) => (
+            {files?.map((file: File, index: number) => (
               <FileCard
                 key={index}
                 file={file}

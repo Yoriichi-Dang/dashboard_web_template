@@ -51,8 +51,8 @@ import {
 } from '@/shared/components/ui/sidebar';
 import { UserAvatarProfile } from '@/shared/components/user-avatar-profile';
 import { navItems } from '@/shared/config/nav-config';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import { useFilteredNavItems } from '@/hooks/use-nav';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
+import { useFilteredNavItems } from '@/shared/hooks/use-nav';
 
 import { Icons } from '../icons';
 
@@ -96,8 +96,10 @@ export default function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Overview</SidebarGroupLabel>
           <SidebarMenu>
-            {filteredItems.map((item) => {
-              const Icon = item.icon ? Icons[item.icon] : Icons.logo;
+            {filteredItems.map((item: (typeof navItems)[0]) => {
+              const Icon = item.icon
+                ? Icons[item.icon as keyof typeof Icons]
+                : Icons.logo;
               return item?.items && item?.items?.length > 0 ? (
                 <Collapsible
                   key={item.title}
@@ -118,7 +120,7 @@ export default function AppSidebar() {
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {item.items?.map((subItem) => (
+                        {item.items?.map((subItem: (typeof item.items)[0]) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton
                               asChild
