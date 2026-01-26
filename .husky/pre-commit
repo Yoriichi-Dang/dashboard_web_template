@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 echo "🎨 Formatting code with Prettier..."
 bunx lint-staged
 
