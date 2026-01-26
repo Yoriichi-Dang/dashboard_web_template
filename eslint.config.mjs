@@ -52,7 +52,8 @@ export default defineConfig([
     'dist/**',
     'coverage/**',
     'next-env.d.ts',
-    'node_modules/**'
+    'node_modules/**',
+    'src/shared/components/ui/**'
   ]),
 
   // ✅ Non-TS-plugin rules can live in their own config object
@@ -196,6 +197,11 @@ export default defineConfig([
       'no-implicit-coercion': 'error',
       'no-return-await': 'error'
     }
+  },
+
+  // Ignore Shadcn UI components (generated/copied from library)
+  {
+    ignores: ['src/shared/components/ui/**']
   },
 
   // Optional: allow console in scripts/config
