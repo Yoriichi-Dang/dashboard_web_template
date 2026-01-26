@@ -1,0 +1,1130 @@
+# Feature-Sliced Design (FSD) Architecture Rules
+
+## Overview
+
+This project follows **Feature-Sliced Design (FSD)** methodology for organizing frontend code. FSD is an architectural methodology that structures code by business features rather than technical layers, promoting scalability, maintainability, and clear boundaries.
+
+## FSD Layers (Bottom to Top)
+
+```
+app/          # Application initialization, routing, providers
+├── pages/    # Full-page compositions
+├── widgets/  # Complex UI blocks (optional, use when needed)
+├── features/ # User interactions, business actions
+├── entities/ # Business entities (optional, use when needed)
+└── shared/   # Reusable infrastructure code
+```
+
+### Import Rules (Dependency Direction)
+
+**CRITICAL**: Imports can only go **UPWARD** in the layer hierarchy. Lower layers cannot import from higher layers.
+
+```
+app → pages → widgets → features → entities → shared
+ ↑      ↑        ↑         ↑          ↑         ↑
+Allowed import direction (upward only)
+```
+
+**✅ CORRECT:**
+- `features/auth` can import from `shared/components/ui`, `shared/lib`
+- `pages/dashboard` can import from `features/auth`, `shared/components/ui`
+- `app` can import from all layers
+
+**❌ WRONG:**
+- `shared/components/ui` importing from `features/auth` (violates dependency rule)
+- `entities/user` importing from `features/profile` (violates dependency rule)
+- `features` importing from `pages` (violates dependency rule)
+
+## Layer Definitions & Rules
+
+### 1. `shared/` - Reusable Infrastructure
+
+**Purpose**: Foundation layer containing reusable code with no business logic.
+
+**Contains:**
+- UI primitives (buttons, inputs, cards, etc.)
+- Utility functions (`lib/utils.ts`, formatters, validators)
+- Hooks without business logic (`use-debounce`, `use-media-query`)
+- Types and constants (if truly shared across multiple features)
+- API clients and configurations
+- Theme providers, context providers
+
+**Rules:**
+- ❌ NO business logic
+- ❌ NO feature-specific code
+- ❌ NO imports from `features/`, `entities/`, `pages/`, `app/`
+- ✅ Can import from external libraries only
+- ✅ Must be framework-agnostic when possible
+
+**Structure:**
+```
+shared/
+├── components/
+│   └── ui/          # UI primitives (Shadcn components)
+│       ├── button.tsx
+│       ├── input.tsx
+│       ├── card.tsx
+│       └── ...      # All Shadcn UI components
+├── lib/             # Utility functions
+│   ├── utils.ts
+│   ├── format.ts
+│   └── validators.ts
+├── hooks/           # Reusable hooks (no business logic)
+│   ├── use-debounce.ts
+│   └── use-media-query.ts
+├── api/             # API clients, axios instances
+│   └── client.ts
+├── config/          # App-wide configurations
+│   └── constants.ts
+└── types/           # Shared TypeScript types
+    └── index.ts
+```
+
+### Using Shadcn UI Components
+
+**Shadcn UI components are located in `@/shared/components/ui/`**. These are base UI primitives that should be used as building blocks for feature-specific components.
+
+**✅ DO:**
+- Import Shadcn components from `@/shared/components/ui/`
+- Compose Shadcn components to create feature-specific UI
+- Extend Shadcn components with additional props when needed
+- Use Shadcn components as foundation for custom components
+
+**❌ DON'T:**
+- Modify Shadcn components directly in `shared/components/ui/`
+- Duplicate Shadcn component logic in features
+- Create feature-specific versions of Shadcn components without composing them
+
+**Example - Using Shadcn Components:**
+```tsx
+// ✅ features/auth/ui/sign-in-form.tsx
+'use client';
+
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { useSignIn } from '../hooks/use-sign-in';
+
+export function SignInForm() {
+  const { mutate: signIn, isPending } = useSignIn();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sign In</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit}>
+          <Input name="email" type="email" placeholder="Email" />
+          <Input name="password" type="password" placeholder="Password" />
+          <Button type="submit" disabled={isPending}>
+            {isPending ? 'Signing in...' : 'Sign In'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+**Example - Composing Shadcn Components:**
+```tsx
+// ✅ features/products/ui/product-card.tsx
+'use client';
+
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/shared/components/ui/avatar';
+import type { Product } from '../model/types';
+
+interface ProductCardProps {
+  product: Product;
+  onAddToCart?: (productId: string) => void;
+}
+
+export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <Avatar>
+          <AvatarImage src={product.image} alt={product.name} />
+          <AvatarFallback>{product.name[0]}</AvatarFallback>
+        </Avatar>
+        <CardTitle>{product.name}</CardTitle>
+        <Badge variant="secondary">{product.category}</Badge>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-bold">${product.price}</p>
+        <p className="text-sm text-muted-foreground">{product.description}</p>
+      </CardContent>
+      <CardFooter>
+        <Button onClick={() => onAddToCart?.(product.id)}>
+          Add to Cart
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+**Example - Extending Shadcn Components:**
+```tsx
+// ✅ features/forms/ui/form-input.tsx
+'use client';
+
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { ComponentProps } from 'react';
+import { cn } from '@/shared/lib/utils';
+
+interface FormInputProps extends ComponentProps<typeof Input> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+}
+
+export function FormInput({ label, error, helperText, className, id, ...props }: FormInputProps) {
+  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+
+  return (
+    <div className="space-y-2">
+      {label && (
+        <Label htmlFor={inputId} className={error ? 'text-destructive' : ''}>
+          {label}
+        </Label>
+      )}
+      <Input
+        id={inputId}
+        className={cn(error && 'border-destructive focus-visible:ring-destructive', className)}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${inputId}-error` : undefined}
+        {...props}
+      />
+      {error && (
+        <p id={`${inputId}-error`} className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
+      {helperText && !error && (
+        <p className="text-sm text-muted-foreground">{helperText}</p>
+      )}
+    </div>
+  );
+}
+```
+
+### 2. `entities/` - Business Entities (Optional)
+
+**Purpose**: Business entities that represent core domain models. Use when you have entities shared across multiple features.
+
+**Contains:**
+- Entity models (User, Product, Order)
+- Entity-specific UI components
+- Entity-specific hooks and utilities
+- Entity types and schemas
+
+**When to use:**
+- Entity is used by 3+ features
+- Entity has complex business logic
+- Entity needs to be reused across different contexts
+
+**Rules:**
+- ❌ NO feature-specific logic
+- ❌ NO imports from `features/`, `pages/`, `app/`
+- ✅ Can import from `shared/` only
+- ✅ Can import from other `entities/` (carefully)
+
+**Structure:**
+```
+entities/
+├── user/
+│   ├── model/
+│   │   └── types.ts
+│   ├── ui/
+│   │   └── user-card.tsx
+│   └── api/
+│       └── user-api.ts
+└── product/
+    ├── model/
+    │   └── types.ts
+    └── ui/
+        └── product-card.tsx
+```
+
+**Example:**
+```tsx
+// ✅ entities/user/model/types.ts
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+// ✅ entities/user/ui/user-card.tsx
+import { User } from '../model/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+
+export function UserCard({ user }: { user: User }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{user.name}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>{user.email}</p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### 3. `features/` - User Interactions & Business Actions
+
+**Purpose**: Self-contained features representing user interactions and business actions.
+
+**Contains:**
+- Feature-specific components
+- Feature-specific hooks (business logic)
+- Feature-specific API calls
+- Feature-specific stores (Zustand, etc.)
+- Feature-specific types and schemas
+- Server actions (Next.js)
+
+**Rules:**
+- ❌ NO imports from `pages/`, `widgets/`, `app/`
+- ✅ Can import from `shared/`, `entities/`, other `features/` (via public API only)
+- ✅ Each feature must have a public API (`index.ts`)
+- ✅ Feature should be self-contained and independently testable
+
+**Structure:**
+```
+features/
+├── auth/
+│   ├── index.ts              # Public API (exports only)
+│   ├── ui/
+│   │   ├── sign-in-form.tsx
+│   │   └── sign-up-form.tsx
+│   ├── model/
+│   │   ├── types.ts
+│   │   └── schemas.ts        # Zod schemas
+│   ├── api/
+│   │   └── auth-api.ts
+│   ├── hooks/
+│   │   ├── use-sign-in.ts
+│   │   └── use-sign-out.ts
+│   └── lib/
+│       └── auth-helpers.ts
+├── product-list/
+│   ├── index.ts
+│   ├── ui/
+│   │   └── product-list.tsx
+│   └── hooks/
+│       └── use-product-list.ts
+└── cart/
+    ├── index.ts
+    ├── ui/
+    │   └── cart-button.tsx
+    └── store/
+        └── cart-store.ts
+```
+
+**Public API Pattern:**
+```tsx
+// ✅ features/auth/index.ts
+// Export only what other features/pages need
+export { SignInForm, SignUpForm } from './ui';
+export { useSignIn, useSignOut } from './hooks';
+export type { AuthUser } from './model/types';
+
+// ❌ DON'T export internal utilities, internal components
+```
+
+**Example:**
+```tsx
+// ✅ features/auth/ui/sign-in-form.tsx
+'use client';
+
+import { useSignIn } from '../hooks/use-sign-in';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { signInSchema } from '../model/schemas';
+
+export function SignInForm() {
+  const { mutate: signIn, isPending } = useSignIn();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = signInSchema.parse({
+      email: formData.get('email'),
+      password: formData.get('password'),
+    });
+    signIn(data);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sign In</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit}>
+          <Input name="email" type="email" placeholder="Email" />
+          <Input name="password" type="password" placeholder="Password" />
+          <Button type="submit" disabled={isPending}>
+            {isPending ? 'Signing in...' : 'Sign In'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### 4. `widgets/` - Complex UI Blocks (Optional)
+
+**Purpose**: Complex, reusable UI blocks that combine multiple features/entities. Use sparingly.
+
+**Contains:**
+- Composite components combining multiple features
+- Complex layouts
+- Dashboard sections, headers with multiple features
+
+**When to use:**
+- Component uses 2+ features
+- Component is a major UI block (header, sidebar, dashboard section)
+- Component is reused across multiple pages
+
+**Rules:**
+- ❌ NO imports from `pages/`, `app/`
+- ✅ Can import from `features/`, `entities/`, `shared/`
+- ✅ Should compose features, not duplicate their logic
+
+**Structure:**
+```
+widgets/
+├── header/
+│   ├── index.ts
+│   └── ui/
+│       └── header.tsx
+└── dashboard-stats/
+    ├── index.ts
+    └── ui/
+        └── dashboard-stats.tsx
+```
+
+**Example:**
+```tsx
+// ✅ widgets/header/ui/header.tsx
+'use client';
+
+import { UserNav } from '@/features/user-profile/ui/user-nav';
+import { CartButton } from '@/features/cart/ui/cart-button';
+import { Input } from '@/shared/components/ui/input';
+import { Search } from 'lucide-react';
+
+export function Header() {
+  return (
+    <header className="flex items-center gap-4 p-4 border-b">
+      <div className="relative flex-1 max-w-md">
+        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search..." className="pl-8" />
+      </div>
+      <CartButton />
+      <UserNav />
+    </header>
+  );
+}
+```
+
+### 5. `pages/` - Full Page Compositions
+
+**Purpose**: Full-page components that compose widgets and features into complete pages.
+
+**Contains:**
+- Page-level components
+- Page-specific layouts
+- Route-specific logic
+
+**Rules:**
+- ❌ NO imports from `app/`
+- ✅ Can import from `widgets/`, `features/`, `entities/`, `shared/`
+- ✅ Should be thin - delegate logic to features/widgets
+- ✅ Use Next.js App Router patterns (Server/Client Components)
+
+**Structure:**
+```
+pages/
+├── dashboard/
+│   ├── index.ts
+│   └── ui/
+│       └── dashboard-page.tsx
+└── product-detail/
+    ├── index.ts
+    └── ui/
+        └── product-detail-page.tsx
+```
+
+**Example:**
+```tsx
+// ✅ pages/dashboard/ui/dashboard-page.tsx
+import { Header } from '@/widgets/header';
+import { DashboardStats } from '@/widgets/dashboard-stats';
+import { RecentProducts } from '@/features/product-list/ui/recent-products';
+
+export function DashboardPage() {
+  return (
+    <div>
+      <Header />
+      <DashboardStats />
+      <RecentProducts />
+    </div>
+  );
+}
+```
+
+### 6. `app/` - Application Layer (Next.js App Router)
+
+**Purpose**: Next.js App Router directory - routing, layouts, providers, metadata.
+
+**Contains:**
+- Route files (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`)
+- API routes (`api/`)
+- Root layout and providers
+- Route groups
+- Metadata configurations
+
+**Rules:**
+- ✅ Can import from all layers
+- ✅ Should be minimal - delegate to `pages/`
+- ✅ Follow Next.js 16 App Router conventions
+- ✅ Use Server Components by default, add `'use client'` only when needed
+
+**Structure:**
+```
+app/
+├── layout.tsx              # Root layout
+├── page.tsx                # Home page
+├── (auth)/
+│   ├── sign-in/
+│   │   └── page.tsx
+│   └── sign-up/
+│       └── page.tsx
+├── (dashboard)/
+│   ├── layout.tsx
+│   ├── dashboard/
+│   │   └── page.tsx
+│   └── products/
+│       └── page.tsx
+└── api/
+    └── auth/
+        └── route.ts
+```
+
+**Example:**
+```tsx
+// ✅ app/(dashboard)/dashboard/page.tsx
+import { DashboardPage } from '@/pages/dashboard';
+
+export default function DashboardRoute() {
+  return <DashboardPage />;
+}
+
+// ✅ app/(dashboard)/dashboard/page.tsx (with data fetching)
+import { DashboardPage } from '@/pages/dashboard';
+import { getDashboardData } from '@/features/dashboard/api/dashboard-api';
+
+export default async function DashboardRoute() {
+  const data = await getDashboardData();
+  return <DashboardPage initialData={data} />;
+}
+```
+
+## File Naming Conventions
+
+### Components
+- Use `kebab-case.tsx` for component files
+- Component name should match file name (PascalCase)
+- Example: `user-profile-card.tsx` → `UserProfileCard`
+
+### Hooks
+- Prefix with `use-`: `use-auth.ts`, `use-product-list.ts`
+- Hook name: `useAuth`, `useProductList`
+
+### Types
+- Use `kebab-case.types.ts`: `user.types.ts`, `product.types.ts`
+- Or co-locate with component: `user-card.tsx` + `user-card.types.ts`
+
+### Utilities
+- Use `kebab-case.ts`: `format-date.ts`, `validate-email.ts`
+
+### Folders
+- Use `kebab-case` for folder names
+- Segment folders: `ui/`, `model/`, `api/`, `hooks/`, `lib/`, `store/`
+
+## Public API Pattern (index.ts)
+
+**Every feature/entity/widget must have a public API:**
+
+```tsx
+// ✅ features/auth/index.ts
+// Export public interface only
+export { SignInForm, SignUpForm } from './ui';
+export { useSignIn, useSignOut, useAuth } from './hooks';
+export type { AuthUser, SignInCredentials } from './model/types';
+export { signInSchema, signUpSchema } from './model/schemas';
+
+// ❌ DON'T export:
+// - Internal utilities
+// - Internal components
+// - Implementation details
+```
+
+**Usage:**
+```tsx
+// ✅ CORRECT: Import from public API
+import { SignInForm, useAuth } from '@/features/auth';
+
+// ❌ WRONG: Import from internal path
+import { SignInForm } from '@/features/auth/ui/sign-in-form';
+```
+
+## React Clean Code Best Practices
+
+### 1. Component Structure
+
+**✅ DO:**
+- Keep components small and focused (Single Responsibility)
+- Use descriptive, meaningful names
+- Extract complex logic into custom hooks
+- Use TypeScript for all components
+- Prefer composition over inheritance
+
+**❌ DON'T:**
+- Create god components (doing too much)
+- Mix business logic with UI rendering
+- Use `any` type
+- Create deeply nested components without extracting
+
+**Example:**
+```tsx
+// ✅ GOOD: Small, focused component
+export function UserAvatar({ user, size = 'md' }: UserAvatarProps) {
+  return (
+    <div className={cn('avatar', size)}>
+      <img src={user.avatar} alt={user.name} />
+    </div>
+  );
+}
+
+// ❌ BAD: Component doing too much
+export function UserProfile({ userId }: { userId: string }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    fetch(`/api/users/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        setUser(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err);
+        setLoading(false);
+      });
+  }, [userId]);
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+      {/* ... 100 more lines */}
+    </div>
+  );
+}
+
+// ✅ GOOD: Extracted logic to hook
+export function UserProfile({ userId }: { userId: string }) {
+  const { data: user, isLoading, error } = useUser(userId);
+  
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} />;
+  
+  return <UserProfileContent user={user} />;
+}
+```
+
+### 2. Custom Hooks
+
+**✅ DO:**
+- Extract reusable logic into hooks
+- Return objects/arrays with named values
+- Use descriptive hook names starting with `use`
+- Handle loading, error states in hooks
+- Keep hooks focused on single responsibility
+
+**Example:**
+```tsx
+// ✅ GOOD: Focused hook with clear return
+export function useUser(userId: string) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => userApi.getUser(userId),
+  });
+
+  return {
+    user: data,
+    isLoading,
+    error,
+    isError: !!error,
+  };
+}
+
+// ✅ GOOD: Hook with mutations
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: userApi.updateUser,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['user', data.id] });
+    },
+  });
+}
+```
+
+### 3. TypeScript Best Practices
+
+**✅ DO:**
+- Define types for all props
+- Use `interface` for object shapes, `type` for unions/intersections
+- Export types from feature's `model/types.ts`
+- Use utility types (`ComponentProps`, `Pick`, `Omit`)
+- Avoid `any`, use `unknown` if type is truly unknown
+
+**Example:**
+```tsx
+// ✅ GOOD: Proper typing
+interface UserCardProps {
+  user: User;
+  onEdit?: (user: User) => void;
+  className?: string;
+}
+
+export function UserCard({ user, onEdit, className }: UserCardProps) {
+  // ...
+}
+
+// ✅ GOOD: Extending component props
+import { ComponentProps } from 'react';
+import { Button } from '@/shared/components/ui/button';
+
+type CustomButtonProps = ComponentProps<typeof Button> & {
+  isLoading?: boolean;
+};
+
+export function CustomButton({ isLoading, children, ...props }: CustomButtonProps) {
+  return (
+    <Button disabled={isLoading} {...props}>
+      {isLoading ? 'Loading...' : children}
+    </Button>
+  );
+}
+```
+
+### 4. State Management
+
+**✅ DO:**
+- Use React Query for server state
+- Use Zustand for client state (when needed)
+- Use `useState` for local component state
+- Lift state up only when necessary
+- Keep state as close to usage as possible
+
+**Example:**
+```tsx
+// ✅ GOOD: Server state with React Query
+export function useProducts(filters?: ProductFilters) {
+  return useQuery({
+    queryKey: ['products', filters],
+    queryFn: () => productApi.getProducts(filters),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+// ✅ GOOD: Client state with Zustand (when needed)
+export const useCartStore = create<CartState>((set) => ({
+  items: [],
+  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
+  removeItem: (id) => set((state) => ({ items: state.items.filter(i => i.id !== id) })),
+}));
+```
+
+### 5. Performance Optimization
+
+**✅ DO:**
+- Use Server Components by default (Next.js)
+- Add `'use client'` only when needed (hooks, interactivity, browser APIs)
+- Use `React.memo` for expensive components (sparingly)
+- Use `useMemo` and `useCallback` only when necessary
+- Code split with dynamic imports for large components
+
+**Example:**
+```tsx
+// ✅ GOOD: Server Component (default)
+import { ProductList } from '@/features/products/ui/product-list';
+
+export default async function ProductsPage() {
+  const products = await getProducts();
+  return <ProductList products={products} />;
+}
+
+// ✅ GOOD: Client Component (when needed)
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/shared/components/ui/button';
+
+export function InteractiveButton() {
+  const [count, setCount] = useState(0);
+  return <Button onClick={() => setCount(c => c + 1)}>Count: {count}</Button>;
+}
+
+// ✅ GOOD: Dynamic import for code splitting
+import dynamic from 'next/dynamic';
+
+const HeavyChart = dynamic(() => import('@/features/analytics/ui/chart'), {
+  loading: () => <ChartSkeleton />,
+  ssr: false,
+});
+```
+
+### 6. Error Handling
+
+**✅ DO:**
+- Handle errors at appropriate boundaries
+- Use error boundaries for component errors
+- Handle API errors in hooks/services
+- Provide user-friendly error messages
+- Log errors appropriately
+
+**Example:**
+```tsx
+// ✅ GOOD: Error handling in hook
+export function useUser(userId: string) {
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => userApi.getUser(userId),
+    retry: 1,
+    onError: (error) => {
+      console.error('Failed to fetch user:', error);
+      toast.error('Failed to load user data');
+    },
+  });
+
+  return { user: data, error, isLoading };
+}
+
+// ✅ GOOD: Error boundary
+'use client';
+
+import { ErrorBoundary } from 'react-error-boundary';
+
+function ErrorFallback({ error }: { error: Error }) {
+  return (
+    <div role="alert">
+      <h2>Something went wrong:</h2>
+      <pre>{error.message}</pre>
+    </div>
+  );
+}
+
+export function App() {
+  return (
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <YourApp />
+    </ErrorBoundary>
+  );
+}
+```
+
+### 7. Code Organization
+
+**✅ DO:**
+- Group related code together
+- Use consistent file structure within features
+- Keep files focused (one main export per file when possible)
+- Use barrel exports (`index.ts`) for public API
+- Organize imports: external → internal, grouped by type
+
+**Example:**
+```tsx
+// ✅ GOOD: Organized imports
+// External libraries
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+// Shared code
+import { Button } from '@/shared/components/ui/button';
+import { cn } from '@/shared/lib/utils';
+
+// Feature code
+import { useAuth } from '@/features/auth';
+import { UserCard } from '@/entities/user/ui/user-card';
+
+// Types
+import type { User } from '@/entities/user/model/types';
+```
+
+### 8. Testing Considerations
+
+**✅ DO:**
+- Write testable code (pure functions, dependency injection)
+- Keep business logic separate from UI
+- Use dependency injection for API calls
+- Make components easily testable
+
+**Example:**
+```tsx
+// ✅ GOOD: Testable hook with dependency injection
+export function useUser(userId: string, api = userApi) {
+  return useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => api.getUser(userId),
+  });
+}
+
+// ✅ GOOD: Testable component
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+
+export function UserCard({ user, onEdit }: UserCardProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{user.name}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {onEdit && <Button onClick={() => onEdit(user)}>Edit</Button>}
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## Next.js 16 App Router Specific Rules
+
+### Server vs Client Components
+
+**✅ Use Server Components by default:**
+- Data fetching
+- Accessing backend resources
+- Keeping sensitive information on server
+- Large dependencies (reduce client bundle)
+
+**✅ Use Client Components when:**
+- Using hooks (`useState`, `useEffect`, etc.)
+- Using browser APIs (`window`, `localStorage`, etc.)
+- Event listeners (`onClick`, `onChange`, etc.)
+- State management libraries (Zustand, etc.)
+- Animation libraries (Framer Motion, etc.)
+
+**Example:**
+```tsx
+// ✅ Server Component (default)
+import { getProducts } from '@/features/products/api/product-api';
+
+export default async function ProductsPage() {
+  const products = await getProducts();
+  return <ProductList products={products} />;
+}
+
+// ✅ Client Component (when needed)
+'use client';
+
+import { useState } from 'react';
+
+export function ProductFilters() {
+  const [filters, setFilters] = useState({});
+  // ... interactive logic
+}
+```
+
+### Data Fetching
+
+**✅ DO:**
+- Fetch data in Server Components when possible
+- Use React Query for client-side data fetching
+- Use Server Actions for mutations
+- Handle loading and error states
+
+**Example:**
+```tsx
+// ✅ Server Component data fetching
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  const product = await getProduct(params.id);
+  if (!product) notFound();
+  return <ProductDetail product={product} />;
+}
+
+// ✅ Server Action
+'use server';
+
+import { revalidatePath } from 'next/cache';
+
+export async function updateProduct(formData: FormData) {
+  const id = formData.get('id') as string;
+  const data = Object.fromEntries(formData);
+  await productApi.updateProduct(id, data);
+  revalidatePath(`/products/${id}`);
+}
+```
+
+## Common Patterns
+
+### Feature with API, Hooks, and UI
+
+```
+features/product-list/
+├── index.ts                 # Public API
+├── ui/
+│   └── product-list.tsx
+├── hooks/
+│   └── use-product-list.ts
+├── api/
+│   └── product-api.ts
+├── model/
+│   ├── types.ts
+│   └── schemas.ts
+└── lib/
+    └── product-helpers.ts
+```
+
+### Feature with Store
+
+```
+features/cart/
+├── index.ts
+├── ui/
+│   └── cart-button.tsx
+├── store/
+│   └── cart-store.ts
+└── model/
+    └── types.ts
+```
+
+## Checklist Before Committing
+
+- [ ] All imports follow FSD dependency rules (upward only)
+- [ ] Feature has public API (`index.ts`) with proper exports
+- [ ] No business logic in `shared/` layer
+- [ ] Components are small and focused
+- [ ] Types are properly defined
+- [ ] Server/Client Components are used correctly
+- [ ] Error handling is implemented
+- [ ] Code follows naming conventions
+- [ ] No circular dependencies
+- [ ] Public API doesn't expose internal implementation
+
+## Migration Guide (If Refactoring)
+
+1. **Identify features**: Group related functionality
+2. **Move to `features/`**: Extract feature code
+3. **Create public API**: Add `index.ts` with exports
+4. **Move shared code**: Identify truly shared code → `shared/`
+5. **Update imports**: Use public APIs, fix dependency violations
+6. **Test**: Ensure everything still works
+
+## Shadcn UI Components Quick Reference
+
+### Import Path
+All Shadcn UI components are located in:
+```
+@/shared/components/ui/{component-name}
+```
+
+### Common Components
+```tsx
+// Buttons & Actions
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+
+// Forms
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Checkbox } from '@/shared/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/shared/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Switch } from '@/shared/components/ui/switch';
+import { Slider } from '@/shared/components/ui/slider';
+
+// Layout
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Separator } from '@/shared/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+
+// Overlays
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu';
+
+// Feedback
+import { Alert, AlertDescription, AlertTitle } from '@/shared/components/ui/alert';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/shared/components/ui/alert-dialog';
+import { toast } from 'sonner'; // from '@/shared/components/ui/sonner'
+
+// Data Display
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/shared/components/ui/table';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import { Skeleton } from '@/shared/components/ui/skeleton';
+
+// Navigation
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/shared/components/ui/breadcrumb';
+```
+
+### Usage Pattern
+```tsx
+// ✅ CORRECT: Compose Shadcn components in features
+// features/products/ui/product-card.tsx
+'use client';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+
+export function ProductCard({ product }: { product: Product }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{product.name}</CardTitle>
+        <Badge>{product.category}</Badge>
+      </CardHeader>
+      <CardContent>
+        <Button>Add to Cart</Button>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## Resources
+
+- [Feature-Sliced Design Documentation](https://feature-sliced.design/)
+- [FSD Examples](https://github.com/feature-sliced/documentation)
+- [Next.js App Router](https://nextjs.org/docs/app)
+- [React Best Practices](https://react.dev/learn)
+- [Shadcn UI Documentation](https://ui.shadcn.com/)
+
+---
+
+**Remember**: FSD is about organizing code by business features, not technical layers. Think about what the user does, not how the code is structured technically. Always use Shadcn UI components from `@/shared/components/ui/` as building blocks for your feature components.
