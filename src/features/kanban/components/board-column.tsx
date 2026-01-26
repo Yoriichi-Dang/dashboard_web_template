@@ -5,9 +5,9 @@ import { IconGripVertical } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
 import { useMemo } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/shared/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/shared/components/ui/scroll-area';
 
 import type { Task } from '../utils/store';
 import { ColumnActions } from './column-action';

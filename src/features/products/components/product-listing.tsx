@@ -1,6 +1,6 @@
-import type { Product } from '@/constants/data';
-import { fakeProducts } from '@/constants/mock-api';
-import { searchParamsCache } from '@/lib/searchparams';
+import type { Product } from '@/shared/constants/data';
+import { fakeProducts } from '@/shared/constants/mock-api';
+import { searchParamsCache } from '@/shared/lib/searchparams';
 
 import { ProductTable } from './product-tables';
 import { columns } from './product-tables/columns';

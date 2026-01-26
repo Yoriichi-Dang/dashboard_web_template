@@ -8,11 +8,11 @@ import { cookies } from 'next/headers';
 import NextTopLoader from 'nextjs-toploader';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
-import Providers from '@/components/layout/providers';
-import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider';
-import { Toaster } from '@/components/ui/sonner';
-import { fontVariables } from '@/lib/font';
-import { cn } from '@/lib/utils';
+import Providers from '@/shared/components/layout/providers';
+import ThemeProvider from '@/shared/components/layout/ThemeToggle/theme-provider';
+import { Toaster } from '@/shared/components/ui/sonner';
+import { fontVariables } from '@/shared/lib/font';
+import { cn } from '@/shared/lib/utils';
 
 const META_THEME_COLORS = {
   light: '#ffffff',

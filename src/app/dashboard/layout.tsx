@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
-import KBar from '@/components/kbar';
-import AppSidebar from '@/components/layout/app-sidebar';
-import Header from '@/components/layout/header';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import KBar from '@/shared/components/kbar';
+import AppSidebar from '@/shared/components/layout/app-sidebar';
+import Header from '@/shared/components/layout/header';
+import { SidebarInset, SidebarProvider } from '@/shared/components/ui/sidebar';
 
 export const metadata: Metadata = {
   title: 'Next Shadcn Dashboard Starter',

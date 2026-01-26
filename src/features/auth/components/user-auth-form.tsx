@@ -6,9 +6,9 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import { FormInput } from '@/components/forms/form-input';
-import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
+import { FormInput } from '@/shared/components/forms/form-input';
+import { Button } from '@/shared/components/ui/button';
+import { Form } from '@/shared/components/ui/form';
 
 import GithubSignInButton from './github-auth-button';
 

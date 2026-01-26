@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
-import type { Product } from '@/constants/mock-api';
-import { fakeProducts } from '@/constants/mock-api';
+import type { Product } from '@/shared/constants/mock-api';
+import { fakeProducts } from '@/shared/constants/mock-api';
 
 import ProductForm from './product-form';
 

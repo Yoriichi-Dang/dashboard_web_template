@@ -1,8 +1,8 @@
 import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react';
 
-import PageContainer from '@/components/layout/page-container';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import PageContainer from '@/shared/components/layout/page-container';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
 import {
   Card,
   CardAction,
@@ -10,8 +10,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from '@/shared/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 
 import { AreaGraph } from './area-graph';
 import { BarGraph } from './bar-graph';

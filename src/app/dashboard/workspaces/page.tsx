@@ -4,7 +4,7 @@ import { OrganizationList } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { useTheme } from 'next-themes';
 
-import PageContainer from '@/components/layout/page-container';
+import PageContainer from '@/shared/components/layout/page-container';
 
 export default function WorkspacesPage() {
   const { theme } = useTheme();

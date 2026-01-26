@@ -3,15 +3,15 @@
 import { Protect, useOrganization } from '@clerk/nextjs';
 import { BadgeCheck, Lock } from 'lucide-react';
 
-import PageContainer from '@/components/layout/page-container';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import PageContainer from '@/shared/components/layout/page-container';
+import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle
-} from '@/components/ui/card';
+} from '@/shared/components/ui/card';
 
 export default function ExclusivePage() {
   const { organization, isLoaded } = useOrganization();

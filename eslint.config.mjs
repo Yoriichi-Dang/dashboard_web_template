@@ -87,6 +87,96 @@ export default defineConfig([
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
 
+      // Feature-Sliced Design (FSD) Layer Import Restrictions
+      // Enforce FSD dependency rules using file-based restrictions
+      'import/no-restricted-paths': [
+        'error',
+        {
+          zones: [
+            // shared/ cannot import from any higher layers
+            {
+              target: './src/shared/**/*.{ts,tsx}',
+              from: './src/features',
+              message: '❌ FSD Violation: shared/ cannot import from features/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/shared/**/*.{ts,tsx}',
+              from: './src/entities',
+              message: '❌ FSD Violation: shared/ cannot import from entities/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/shared/**/*.{ts,tsx}',
+              from: './src/pages',
+              message: '❌ FSD Violation: shared/ cannot import from pages/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/shared/**/*.{ts,tsx}',
+              from: './src/widgets',
+              message: '❌ FSD Violation: shared/ cannot import from widgets/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/shared/**/*.{ts,tsx}',
+              from: './src/app',
+              message: '❌ FSD Violation: shared/ cannot import from app/. Imports can only go upward in layer hierarchy.'
+            },
+            // entities/ cannot import from higher layers
+            {
+              target: './src/entities/**/*.{ts,tsx}',
+              from: './src/features',
+              message: '❌ FSD Violation: entities/ cannot import from features/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/entities/**/*.{ts,tsx}',
+              from: './src/pages',
+              message: '❌ FSD Violation: entities/ cannot import from pages/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/entities/**/*.{ts,tsx}',
+              from: './src/widgets',
+              message: '❌ FSD Violation: entities/ cannot import from widgets/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/entities/**/*.{ts,tsx}',
+              from: './src/app',
+              message: '❌ FSD Violation: entities/ cannot import from app/. Imports can only go upward in layer hierarchy.'
+            },
+            // features/ cannot import from higher layers
+            {
+              target: './src/features/**/*.{ts,tsx}',
+              from: './src/pages',
+              message: '❌ FSD Violation: features/ cannot import from pages/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/features/**/*.{ts,tsx}',
+              from: './src/widgets',
+              message: '❌ FSD Violation: features/ cannot import from widgets/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/features/**/*.{ts,tsx}',
+              from: './src/app',
+              message: '❌ FSD Violation: features/ cannot import from app/. Imports can only go upward in layer hierarchy.'
+            },
+            // widgets/ cannot import from higher layers
+            {
+              target: './src/widgets/**/*.{ts,tsx}',
+              from: './src/pages',
+              message: '❌ FSD Violation: widgets/ cannot import from pages/. Imports can only go upward in layer hierarchy.'
+            },
+            {
+              target: './src/widgets/**/*.{ts,tsx}',
+              from: './src/app',
+              message: '❌ FSD Violation: widgets/ cannot import from app/. Imports can only go upward in layer hierarchy.'
+            },
+            // pages/ cannot import from app/
+            {
+              target: './src/pages/**/*.{ts,tsx}',
+              from: './src/app',
+              message: '❌ FSD Violation: pages/ cannot import from app/. Imports can only go upward in layer hierarchy.'
+            }
+          ]
+        }
+      ],
+
       // Promise correctness
       'promise/catch-or-return': 'warn',
       'promise/no-nesting': 'warn',

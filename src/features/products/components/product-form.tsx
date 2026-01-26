@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { FormFileUpload } from '@/components/forms/form-file-upload';
-import { FormInput } from '@/components/forms/form-input';
-import { FormSelect } from '@/components/forms/form-select';
-import { FormTextarea } from '@/components/forms/form-textarea';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form } from '@/components/ui/form';
-import type { Product } from '@/constants/mock-api';
+import { FormFileUpload } from '@/shared/components/forms/form-file-upload';
+import { FormInput } from '@/shared/components/forms/form-input';
+import { FormSelect } from '@/shared/components/forms/form-select';
+import { FormTextarea } from '@/shared/components/forms/form-textarea';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Form } from '@/shared/components/ui/form';
+import type { Product } from '@/shared/constants/mock-api';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [

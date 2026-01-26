@@ -2,7 +2,7 @@
 
 import { IconAlertCircle } from '@tabler/icons-react';
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/shared/components/ui/alert';
 
 export default function AreaStatsError({ error }: { error: Error }) {
   return (

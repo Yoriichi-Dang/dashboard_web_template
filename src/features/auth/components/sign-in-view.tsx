@@ -2,8 +2,8 @@ import { SignIn as ClerkSignInForm } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/shared/components/ui/button';
+import { cn } from '@/shared/lib/utils';
 
 import { InteractiveGridPattern } from './interactive-grid';
 

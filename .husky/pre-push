@@ -1,1 +1,10 @@
-pnpm run build
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running typecheck..."
+bun run typecheck || exit 1
+
+echo "🏗️  Building project..."
+bun run build || exit 1
+
+echo "✅ Pre-push checks passed!"

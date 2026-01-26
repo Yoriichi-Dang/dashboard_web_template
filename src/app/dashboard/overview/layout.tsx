@@ -1,8 +1,8 @@
 import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react';
 import React from 'react';
 
-import PageContainer from '@/components/layout/page-container';
-import { Badge } from '@/components/ui/badge';
+import PageContainer from '@/shared/components/layout/page-container';
+import { Badge } from '@/shared/components/ui/badge';
 import {
   Card,
   CardAction,
@@ -10,7 +10,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle
-} from '@/components/ui/card';
+} from '@/shared/components/ui/card';
 
 export default function OverViewLayout({
   sales,
