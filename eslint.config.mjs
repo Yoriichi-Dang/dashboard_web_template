@@ -157,22 +157,53 @@ export default defineConfig([
               from: './src/app',
               message: '❌ FSD Violation: features/ cannot import from app/. Imports can only go upward in layer hierarchy.'
             },
-            // widgets/ cannot import from higher layers
+            // widgets/ can ONLY import from features/ and shared/
             {
               target: './src/widgets/**/*.{ts,tsx}',
               from: './src/pages',
-              message: '❌ FSD Violation: widgets/ cannot import from pages/. Imports can only go upward in layer hierarchy.'
+              message: '❌ FSD Violation: widgets/ cannot import from pages/. Widgets can only import from features/ and shared/.'
             },
             {
               target: './src/widgets/**/*.{ts,tsx}',
               from: './src/app',
-              message: '❌ FSD Violation: widgets/ cannot import from app/. Imports can only go upward in layer hierarchy.'
+              message: '❌ FSD Violation: widgets/ cannot import from app/. Widgets can only import from features/ and shared/.'
             },
-            // pages/ cannot import from app/
+            {
+              target: './src/widgets/**/*.{ts,tsx}',
+              from: './src/entities',
+              message: '❌ FSD Violation: widgets/ cannot import from entities/. Widgets can only import from features/ and shared/.'
+            },
+            // pages/ (src/page) can ONLY import from widgets/ and shared/
+            {
+              target: './src/page/**/*.{ts,tsx}',
+              from: './src/app',
+              message: '❌ FSD Violation: pages/ cannot import from app/. Pages can only import from widgets/ and shared/.'
+            },
+            {
+              target: './src/page/**/*.{ts,tsx}',
+              from: './src/features',
+              message: '❌ FSD Violation: pages/ cannot import from features/. Pages can only import from widgets/ and shared/.'
+            },
+            {
+              target: './src/page/**/*.{ts,tsx}',
+              from: './src/entities',
+              message: '❌ FSD Violation: pages/ cannot import from entities/. Pages can only import from widgets/ and shared/.'
+            },
+            // Legacy pages/ path (if exists) - same rules
             {
               target: './src/pages/**/*.{ts,tsx}',
               from: './src/app',
-              message: '❌ FSD Violation: pages/ cannot import from app/. Imports can only go upward in layer hierarchy.'
+              message: '❌ FSD Violation: pages/ cannot import from app/. Pages can only import from widgets/ and shared/.'
+            },
+            {
+              target: './src/pages/**/*.{ts,tsx}',
+              from: './src/features',
+              message: '❌ FSD Violation: pages/ cannot import from features/. Pages can only import from widgets/ and shared/.'
+            },
+            {
+              target: './src/pages/**/*.{ts,tsx}',
+              from: './src/entities',
+              message: '❌ FSD Violation: pages/ cannot import from entities/. Pages can only import from widgets/ and shared/.'
             }
           ]
         }
