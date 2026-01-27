@@ -18,7 +18,7 @@
       "@/*": ["./src/*"],
       "~/*": ["./public/*"],
       "@/app/*": ["./src/app/*"],
-      "@/pages/*": ["./src/pages/*"],
+      "@/pages/*": ["src/page/*"],
       "@/widgets/*": ["./src/widgets/*"],
       "@/features/*": ["./src/features/*"],
       "@/entities/*": ["./src/entities/*"],
