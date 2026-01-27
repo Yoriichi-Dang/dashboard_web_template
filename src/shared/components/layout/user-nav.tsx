@@ -2,6 +2,7 @@
 import { SignOutButton, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
+import { UserAvatarProfile } from '@/shared/components/common';
 import { Button } from '@/shared/components/ui/button';
 import {
   DropdownMenu,
@@ -12,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu';
-import { UserAvatarProfile } from '@/shared/components/user-avatar-profile';
 
 export function UserNav() {
   const { user } = useUser();

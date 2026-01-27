@@ -2,7 +2,7 @@
 
 import type { FieldPath, FieldValues } from 'react-hook-form';
 
-import { FileUploader } from '@/shared/components/file-uploader';
+import { FileUploader } from '@/shared/components/common/file-uploader';
 import {
   FormControl,
   FormDescription,
@@ -11,7 +11,10 @@ import {
   FormLabel,
   FormMessage
 } from '@/shared/components/ui/form';
-import type { BaseFormFieldProps, FileUploadConfig } from '@/shared/types/base-form';
+import type {
+  BaseFormFieldProps,
+  FileUploadConfig
+} from '@/shared/types/base-form';
 
 interface FormFileUploadProps<
   TFieldValues extends FieldValues = FieldValues,

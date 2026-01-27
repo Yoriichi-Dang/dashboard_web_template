@@ -4,7 +4,7 @@ import { dark } from '@clerk/themes';
 import { useTheme } from 'next-themes';
 import React from 'react';
 
-import { ActiveThemeProvider } from '../active-theme';
+import { ActiveThemeProvider } from '../common/active-theme';
 
 export default function Providers({
   activeThemeValue,

@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { Breadcrumbs } from '../breadcrumbs';
-import SearchInput from '../search-input';
-import { ThemeSelector } from '../theme-selector';
+import SearchInput from '../common/search-input';
+import { ThemeSelector } from '../common/theme-selector';
+import { Breadcrumbs } from '../navigation';
 import CtaGithub from './cta-github';
 import { ModeToggle } from './ThemeToggle/theme-toggle';
 import { UserNav } from './user-nav';

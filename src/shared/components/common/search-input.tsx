@@ -2,7 +2,7 @@
 import { IconSearch } from '@tabler/icons-react';
 import { useKBar } from 'kbar';
 
-import { Button } from './ui/button';
+import { Button } from '@/shared/components/ui/button';
 
 export default function SearchInput() {
   const { query } = useKBar();

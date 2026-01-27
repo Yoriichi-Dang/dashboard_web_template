@@ -1,6 +1,6 @@
 'use client';
 
-import { Icons } from '@/shared/components/icons';
+import { Icons } from '@/shared/components/common/icons';
 import { Button } from '@/shared/components/ui/button';
 
 export default function GithubSignInButton() {

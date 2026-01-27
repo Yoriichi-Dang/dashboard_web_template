@@ -1,4 +1,4 @@
-import type { Icons } from '@/shared/components/icons';
+import type { Icons } from '@/shared/components/common/icons';
 
 export interface PermissionCheck {
   permission?: string;

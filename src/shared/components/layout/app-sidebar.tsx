@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 
+import { UserAvatarProfile } from '@/shared/components/common';
 import { DropdownMenuThemeToggleItem } from '@/shared/components/layout/ThemeToggle/theme-toggle';
 import {
   Collapsible,
@@ -49,12 +50,11 @@ import {
   SidebarTrigger,
   useSidebar
 } from '@/shared/components/ui/sidebar';
-import { UserAvatarProfile } from '@/shared/components/user-avatar-profile';
 import { navItems } from '@/shared/config/nav-config';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { useFilteredNavItems } from '@/shared/hooks/use-nav';
 
-import { Icons } from '../icons';
+import { Icons } from '../common/icons';
 
 export default function AppSidebar() {
   const pathname = usePathname();

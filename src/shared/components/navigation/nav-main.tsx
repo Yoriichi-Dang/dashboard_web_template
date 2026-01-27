@@ -2,7 +2,7 @@
 
 import { IconChevronRight } from '@tabler/icons-react';
 
-import type { Icon } from '@/shared/components/icons';
+import type { Icon } from '@/shared/components/common/icons';
 import {
   Collapsible,
   CollapsibleContent,
