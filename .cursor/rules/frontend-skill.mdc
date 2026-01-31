@@ -72,6 +72,7 @@ Use a skill **only when one of the following is true**:
 
 | Skill | Path | Use when |
 |-------|------|----------|
+| react-uiux-design-first | `.cursor/skills/react-uiux-design-first/SKILL.md` | Building React components with UX focus, loading/error/empty states, micro-interactions, animations, visual consistency, accessibility |
 | web-design-guidelines | `.cursor/skills/web-design-guidelines/SKILL.md` | Review UI, accessibility, design audit |
 | feature-design-assistant | `.cursor/skills/feature-design-assistant/SKILL.md` | Feature-level design assistance |
 
